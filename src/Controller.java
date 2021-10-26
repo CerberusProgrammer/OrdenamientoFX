@@ -1,8 +1,14 @@
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.AnchorPane;
 
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,13 +20,14 @@ public class Controller implements Initializable {
 
     @FXML
     private BarChart<String, Number> barChart;
-
+    @FXML
+    private TabPane tabPane;
 
     ArrayList<int[]> arrays = new ArrayList<>();
 
-    void createArrays(int amountArrays, int sizeElements) {
+    void createArrays(int amountArrays, int sizeElements, int multiplier) {
         for (int i = 0; i < amountArrays; i++) {
-            int[] array = randomNumbers(sizeElements);
+            int[] array = randomNumbers(sizeElements * multiplier);
             arrays.add(array);
         }
     }
@@ -68,34 +75,50 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        createArrays(6, 100);
+        // createArrays(7, 100, 1);
         ArrayList<XYChart.Series> seriesArrayList = new ArrayList<>();
         int eleccionOrden = 0;
-        String[] strings = {
-                "Insercion",
-                "Seleccion",
-                "Shell",
-                "QuickSort",
-                "BucketSort",
-                "RadixSort",
-                "Arrays.sort()"
-        };
 
-        for (int[] ints: arrays) {
-            long startTime = System.nanoTime();
-            nextOrden(eleccionOrden, ints);
-            long endTime = System.nanoTime();
-            long totalTime = endTime - startTime;
-            // TimeUnit.MILLISECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS)
-            eleccionOrden++;
+        for (int i = 1; i < 51; i += 5) {
+            String[] strings = {"Insercion", "Seleccion", "Shell", "Quick", "Bucket", "Radix", "Sort"};
+            createArrays(strings.length - 1, 10, i);
+            ArrayList<XYChart.Series> series = new ArrayList<>();
+            eleccionOrden = 0;
 
-            XYChart.Series seriesInsercion = new XYChart.Series();
-            seriesInsercion.setName(strings[eleccionOrden]);
-            seriesInsercion.getData().add(new XYChart.Data(strings[eleccionOrden], totalTime));
-            seriesArrayList.add(seriesInsercion);
+            for (int[] ints: arrays) {
+                long startTime = System.nanoTime();
+                nextOrden(eleccionOrden, ints);
+                long endTime = System.nanoTime();
+                long totalTime = endTime - startTime;
+                // TimeUnit.MILLISECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS)
+
+                XYChart.Series seriesInsercion = new XYChart.Series();
+                seriesInsercion.setName(strings[eleccionOrden] + " (" + totalTime + " ns)");
+                seriesInsercion.getData().add(new XYChart.Data(strings[eleccionOrden], totalTime));
+                series.add(seriesInsercion);
+                eleccionOrden++;
+            }
+
+            CategoryAxis xAxis = new CategoryAxis();
+            xAxis.setLabel("Metodos de Ordenacion");
+
+            NumberAxis yAxis = new NumberAxis();
+            yAxis.setLabel("Tiempo (ns)");
+
+            BarChart<String, Number> barChart1 = new BarChart<>(xAxis, yAxis);
+
+            for (XYChart.Series s: series)
+                barChart1.getData().add(s);
+
+            Tab tab = new Tab();
+            tab.setText("" + i);
+            AnchorPane anchorPane = new AnchorPane();
+            anchorPane.getChildren().add(barChart1);
+            tab.setContent(anchorPane);
+            tabPane.getTabs().add(tab);
         }
 
-        for (XYChart.Series series: seriesArrayList)
-            barChart.getData().add(series);
+
+        // for (XYChart.Series series: seriesArrayList)  barChart.getData().add(series);
     }
 }
