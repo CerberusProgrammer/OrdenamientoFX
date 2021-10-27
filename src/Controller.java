@@ -7,6 +7,9 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -75,22 +78,20 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // createArrays(7, 100, 1);
-        ArrayList<XYChart.Series> seriesArrayList = new ArrayList<>();
         int eleccionOrden = 0;
+        int size = 100;
+        String[] strings = {"Insercion", "Seleccion", "Shell", "Quick", "Bucket", "Radix", "Sort"};
 
-        for (int i = 1; i < 51; i += 5) {
-            String[] strings = {"Insercion", "Seleccion", "Shell", "Quick", "Bucket", "Radix", "Sort"};
-            createArrays(strings.length - 1, 10, i);
+        for (int i = 0; i < 5; i++) {
+            arrays.clear();
+            createArrays(strings.length, size, 1);
             ArrayList<XYChart.Series> series = new ArrayList<>();
-            eleccionOrden = 0;
 
             for (int[] ints: arrays) {
                 long startTime = System.nanoTime();
                 nextOrden(eleccionOrden, ints);
                 long endTime = System.nanoTime();
                 long totalTime = endTime - startTime;
-                // TimeUnit.MILLISECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS)
 
                 XYChart.Series seriesInsercion = new XYChart.Series();
                 seriesInsercion.setName(strings[eleccionOrden] + " (" + totalTime + " ns)");
@@ -106,19 +107,24 @@ public class Controller implements Initializable {
             yAxis.setLabel("Tiempo (ns)");
 
             BarChart<String, Number> barChart1 = new BarChart<>(xAxis, yAxis);
+            barChart1.setMaxSize(1280, 690);
+            barChart1.setMinSize(1280, 690);
 
             for (XYChart.Series s: series)
                 barChart1.getData().add(s);
 
             Tab tab = new Tab();
-            tab.setText("" + i);
-            AnchorPane anchorPane = new AnchorPane();
-            anchorPane.getChildren().add(barChart1);
-            tab.setContent(anchorPane);
+            tab.setText("Cantidad: " + size);
+            Pane pane = new Pane();
+            pane.setMaxSize(1280, 690);
+            pane.setMinSize(1280, 690);
+            pane.getChildren().add(barChart1);
+            tab.setContent(pane);
             tabPane.getTabs().add(tab);
+
+            System.out.println(size);
+            size *= 5;
+            eleccionOrden = 0;
         }
-
-
-        // for (XYChart.Series series: seriesArrayList)  barChart.getData().add(series);
     }
 }
