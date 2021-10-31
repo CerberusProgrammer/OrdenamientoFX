@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
 public class Controller implements Initializable {
 
     @FXML
-    private BarChart<String, Number> barChart;
-    @FXML
     private TabPane tabPane;
 
     ArrayList<int[]> arrays = new ArrayList<>();
@@ -62,13 +60,13 @@ public class Controller implements Initializable {
                 Ordenamientos.shell(A);
                 break;
             case 3:
-                Ordenamientos.quicksort(A, 0, 0);
+                Ordenamientos.quicksort(A, 0, A.length - 1);
                 break;
             case 4:
-                Ordenamientos.bucketSort(A, 0);
+                Ordenamientos.bucketSort(A);
                 break;
             case 5:
-                // Ordenamientos.radixSort(A);
+                Ordenamientos.radixSort(A);
                 break;
             case 6:
                 Ordenamientos.sort(A);
@@ -88,10 +86,14 @@ public class Controller implements Initializable {
             ArrayList<XYChart.Series> series = new ArrayList<>();
 
             for (int[] ints: arrays) {
+                System.out.println("Entrada de " + strings[eleccionOrden] + ": " + Arrays.toString(ints));
+
                 long startTime = System.nanoTime();
                 nextOrden(eleccionOrden, ints);
                 long endTime = System.nanoTime();
                 long totalTime = endTime - startTime;
+
+                System.out.println("Salida de " + strings[eleccionOrden] + ": " + Arrays.toString(ints));
 
                 XYChart.Series seriesInsercion = new XYChart.Series();
                 seriesInsercion.setName(strings[eleccionOrden] + " (" + totalTime + " ns)");

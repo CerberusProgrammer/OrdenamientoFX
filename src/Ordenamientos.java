@@ -1,7 +1,5 @@
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Vector;
+import java.util.*;
 
 public class Ordenamientos {
 
@@ -86,56 +84,84 @@ public class Ordenamientos {
             quicksort(A, j + 1, der);
     }
 
-    static void bucketSort(int arr[], int n) {
-        if (n <= 0)
-            return;
+    public static void bucketSort(int[] input) {
+        // get hash codes
+        final int[] code = hash(input);
 
-        @SuppressWarnings("unchecked")
-        Vector<Integer>[] buckets = new Vector[n];
-
-        for (int i = 0; i < n; i++)
-            buckets[i] = new Vector<Integer>();
-
-        for (int i = 0; i < n; i++) {
-            float idx = arr[i] * n;
-            buckets[(int) idx].add(arr[i]);
+        // create and initialize buckets to ArrayList: O(n)
+        List<Integer>[] buckets = new List[code[1]];
+        for (int i = 0; i < code[1]; i++) {
+            buckets[i] = new ArrayList();
         }
 
-        for (int i = 0; i < n; i++)
-            Collections.sort(buckets[i]);
+        // distribute data into buckets: O(n)
+        for (int i : input) {
+            buckets[hash(i, code)].add(i);
+        }
 
-        int index = 0;
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < buckets[i].size(); j++)
-                arr[index++] = buckets[i].get(j);
+        // sort each bucket O(n)
+        for (List bucket : buckets) {
+            Collections.sort(bucket);
+        }
+
+        int ndx = 0;
+        // merge the buckets: O(n)
+        for (int b = 0; b < buckets.length; b++) {
+            for (int v : buckets[b]) {
+                input[ndx++] = v;
+            }
+        }
     }
 
-    static void radixSort(int[] arr) {
-        int max = arr[0];
-        for (int i = 1; i < arr.length; i++) {
-            if (max < arr[i])
-                max = arr[i];
+    public static void radixSort(int[] input) {
+        final int RADIX = 10;
+
+        List<Integer>[] bucket = new ArrayList[RADIX];
+
+        for (int i = 0; i < bucket.length; i++) {
+            bucket[i] = new ArrayList<Integer>();
         }
 
-        for (int s = 1; max / s > 0; s *= 10) {
-            int[] countingArray = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        boolean maxLength = false;
+        int tmp = -1, placement = 1;
+        while (!maxLength) {
+            maxLength = true;
 
-            for (int i = 0; i < arr.length; i++)
-                countingArray[(arr[i] / s) % 10]++;
+            for (Integer i : input) {
+                tmp = i / placement;
+                bucket[tmp % RADIX].add(i);
+                if (maxLength && tmp > 0) {
+                    maxLength = false;
+                }
+            }
 
-            for (int i = 1; i < 10; i++)
-                countingArray[i] += countingArray[i - 1];
+            int a = 0;
+            for (int b = 0; b < RADIX; b++) {
+                for (Integer i : bucket[b]) {
+                    input[a++] = i;
+                }
+                bucket[b].clear();
+            }
 
-            int[] outputArray = {0, 0, 0, 0, 0, 0, 0, 0};
-            for (int i = arr.length - 1; i >= 0; i--)
-                outputArray[--countingArray[(arr[i] / s) % 10]] = arr[i];
-
-            for (int i = 0; i < arr.length; i++)
-                arr[i] = outputArray[i];
+            placement *= RADIX;
         }
     }
 
     static void sort(int[] A) {
         Arrays.sort(A);
+    }
+
+    private static int[] hash(int[] input) {
+        int m = input[0];
+        for (int i = 1; i < input.length; i++) {
+            if (m < input[i]) {
+                m = input[i];
+            }
+        }
+        return new int[] { m, (int) Math.sqrt(input.length) };
+    }
+
+    private static int hash(int i, int[] code) {
+        return (int) ((double) i / code[0] * (code[1] - 1));
     }
 }
